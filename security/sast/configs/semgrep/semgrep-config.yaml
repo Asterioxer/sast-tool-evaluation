@@ -1,0 +1,7 @@
+rules:
+  - id: detected-eval-usage
+    patterns:
+      - pattern: eval(...)
+    message: "Detected use of eval(). This is dangerous as it allows execution of arbitrary code."
+    languages: [python, javascript]
+    severity: ERROR

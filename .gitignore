@@ -1,0 +1,23 @@
+# SAST Tool Evaluation - Gitignore
+
+# Reports
+*.sarif
+*.json
+*.html
+*.txt
+sast-report.pdf
+sonarqube-results.txt
+
+# Secrets
+secrets/
+*.env
+.env
+config.yml
+
+# Checkpoints
+.sast-checkpoints/
+
+# IDE/Tool specific
+.idea/
+.vscode/
+*.swp
