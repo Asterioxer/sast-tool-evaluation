@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       sonarqube:
-        image: sonarqube:community
+        image: sonarqube:9.9-community # Use LTS to ensure compatibility with scanner and avoid API breakages
         ports:
           - 9000:9000
     steps:
@@ -41,6 +41,9 @@ jobs:
             fi
           done
           echo "SonarQube is up!"
+          echo "Changing default password..."
+          curl -u admin:admin -X POST "http://localhost:9000/api/users/change_password?login=admin&previousPassword=admin&password=newstrongpassword123"
+          echo "Password changed."
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
@@ -52,7 +55,7 @@ jobs:
           args: >
             -Dsonar.projectKey=sast-evaluation-project
             -Dsonar.login=admin
-            -Dsonar.password=admin
+            -Dsonar.password=newstrongpassword123
 
 
       # Trivy Scan (Filesystem)
