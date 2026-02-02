@@ -2,11 +2,13 @@ timeout: 10m
 format: table
 exit-code: 0
 severity:
+  - LOW
+  - MEDIUM
   - HIGH
   - CRITICAL
 scan:
   type: fs
-ignore-unfixed: true
+ignore-unfixed: false
 vuln-type:
   - os
   - library
