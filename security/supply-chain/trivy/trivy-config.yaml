@@ -4,3 +4,9 @@ exit-code: 0
 severity:
   - HIGH
   - CRITICAL
+scan:
+  type: fs
+ignore-unfixed: true
+vuln-type:
+  - os
+  - library

@@ -33,11 +33,5 @@ jobs:
       - name: Trivy FS Scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          trivy-config: security/supply-chain/trivy/trivy.yaml
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
+          trivy-config: security/supply-chain/trivy/trivy-config.yaml
         continue-on-error: true
