@@ -10,6 +10,11 @@ jobs:
   sast-scan:
     name: Run SAST Checks
     runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -21,13 +26,34 @@ jobs:
           config: security/sast/semgrep/semgrep-config.yaml
         continue-on-error: true
 
-      # SDK/Setup for Sonar (Simulated/Placeholder as server is needed)
-      - name: SonarQube Scan Setup
+      # SonarQube Scan (Self-hosted in CI)
+      - name: Wait for SonarQube to be ready
         run: |
-          echo "SonarQube assumes a running server."
-          echo "Config found at security/sast/sonarqube/sonar-project.properties"
-          # In a real scenario:
-          # sonar-scanner -Dproject.settings=security/sast/sonarqube/sonar-project.properties
+          echo "Waiting for SonarQube..."
+          count=0
+          while ! curl -s http://localhost:9000 > /dev/null; do
+            echo "Waiting..."
+            sleep 5
+            count=$((count+1))
+            if [ $count -gt 60 ]; then
+              echo "SonarQube failed to start"
+              exit 1
+            fi
+          done
+          echo "SonarQube is up!"
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Ideally used, but for internal ephemeral, we might rely on default admin
+          SONAR_HOST_URL: http://localhost:9000
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=sast-evaluation-project
+            -Dsonar.login=admin
+            -Dsonar.password=admin
+
 
       # Trivy Scan (Filesystem)
       - name: Trivy FS Scan
