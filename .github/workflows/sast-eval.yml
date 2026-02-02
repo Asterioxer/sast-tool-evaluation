@@ -18,16 +18,16 @@ jobs:
       - name: Semgrep Scan
         uses: returntocorp/semgrep-action@v1
         with:
-          config: security/sast/configs/semgrep/semgrep-config.yaml
+          config: security/sast/semgrep/semgrep-config.yaml
         continue-on-error: true
 
       # SDK/Setup for Sonar (Simulated/Placeholder as server is needed)
       - name: SonarQube Scan Setup
         run: |
           echo "SonarQube assumes a running server."
-          echo "Config found at security/sast/configs/sonarqube/sonar-project.properties"
+          echo "Config found at security/sast/sonarqube/sonar-project.properties"
           # In a real scenario:
-          # sonar-scanner -Dproject.settings=security/sast/configs/sonarqube/sonar-project.properties
+          # sonar-scanner -Dproject.settings=security/sast/sonarqube/sonar-project.properties
 
       # Trivy Scan (Filesystem)
       - name: Trivy FS Scan
@@ -35,7 +35,7 @@ jobs:
         with:
           scan-type: 'fs'
           scan-ref: '.'
-          trivy-config: security/trivy/trivy.yaml
+          trivy-config: security/supply-chain/trivy/trivy.yaml
           format: 'table'
           exit-code: '0'
           ignore-unfixed: true
