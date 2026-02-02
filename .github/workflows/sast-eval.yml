@@ -31,24 +31,29 @@ jobs:
         run: |
           echo "Waiting for SonarQube..."
           count=0
-          while ! curl -s http://localhost:9000 > /dev/null; do
-            echo "Waiting..."
+          while ! curl -s "http://localhost:9000/api/system/status" | grep -q '"status":"UP"'; do
+            echo "Waiting for SonarQube to be UP..."
             sleep 5
             count=$((count+1))
             if [ $count -gt 60 ]; then
-              echo "SonarQube failed to start"
+              echo "SonarQube failed to start or is not ready"
+              curl -v http://localhost:9000/api/system/status || true
               exit 1
             fi
           done
-          echo "SonarQube is up!"
+          echo "SonarQube is UP!"
           echo "Changing default password..."
-          curl -u admin:admin -X POST "http://localhost:9000/api/users/change_password?login=admin&previousPassword=admin&password=newstrongpassword123"
+          # Use form data for POST to avoid URL encoding issues and ensure correct API usage for 9.9 LTS
+          curl -v -u admin:admin -X POST "http://localhost:9000/api/users/change_password" \
+            -d "login=admin" \
+            -d "previousPassword=admin" \
+            -d "password=newstrongpassword123"
           echo "Password changed."
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Ideally used, but for internal ephemeral, we might rely on default admin
+          # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Removed to avoid conflict with login/password auth
           SONAR_HOST_URL: http://localhost:9000
         with:
           projectBaseDir: .
