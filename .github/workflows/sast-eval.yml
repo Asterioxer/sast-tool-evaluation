@@ -42,12 +42,16 @@ jobs:
             fi
           done
           echo "SonarQube is UP!"
+          echo "Generating random password..."
+          SONAR_CI_PASSWORD=$(openssl rand -base64 12)
+          echo "SONAR_CI_PASSWORD=$SONAR_CI_PASSWORD" >> $GITHUB_ENV
+          
           echo "Changing default password..."
           # Use form data for POST to avoid URL encoding issues and ensure correct API usage for 9.9 LTS
           curl -v -u admin:admin -X POST "http://localhost:9000/api/users/change_password" \
             -d "login=admin" \
             -d "previousPassword=admin" \
-            -d "password=newstrongpassword123"
+            -d "password=$SONAR_CI_PASSWORD"
           echo "Password changed."
 
       - name: SonarQube Scan
@@ -60,7 +64,7 @@ jobs:
           args: >
             -Dsonar.projectKey=sast-evaluation-project
             -Dsonar.login=admin
-            -Dsonar.password=newstrongpassword123
+            -Dsonar.password=${{ env.SONAR_CI_PASSWORD }}
 
 
       # Trivy Scan (Filesystem)
